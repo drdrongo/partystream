@@ -4,14 +4,17 @@
   "private": true,
   "scripts": {
     "build": "npx tsc",
-    "start": "tsc-watch --onSuccess \"node ./dist/app.js\""
+    "start": "tsc-watch --onSuccess \"ts-node -r tsconfig-paths/register ./dist/src/app.js\""
   },
   "dependencies": {
+    "aws-sdk": "^2.1528.0",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^16.3.1",
     "express": "~4.16.1",
-    "morgan": "~1.9.1"
+    "express-async-handler": "^1.2.0",
+    "morgan": "~1.9.1",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.6",
@@ -23,8 +26,10 @@
     "eslint-config-standard-with-typescript": "^43.0.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.0",
+    "eslint-plugin-prettier": "^5.1.2",
     "eslint-plugin-promise": "^6.1.1",
     "tsc-watch": "^6.0.4",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3"
   }
 }

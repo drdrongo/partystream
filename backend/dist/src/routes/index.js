@@ -1,10 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const aws_1 = require("src/utils/aws");
 const router = (0, express_1.Router)();
-router.get('/', function (req, res, next) {
+router.get('/', (req, res, next) => {
+    const secureUploadUrl = (0, aws_1.getUploadUrl)();
     const jsonData = {
-        message: 'Hello, World!',
+        secureUploadUrl,
         timestamp: new Date().toISOString(),
     };
     res.json(jsonData);

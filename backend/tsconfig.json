@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "ESNext",
     "module": "commonjs",
     "lib": ["es2015"],
     "strict": true,
     "esModuleInterop": true,
+    "removeComments": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
@@ -13,7 +14,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": false,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["./src/*"],
+      "@routes/*": ["./src/routes/*"]
+    }
   },
   "include": ["**/*.ts", "**/*.d.ts"],
   "exclude": ["node_modules"]
