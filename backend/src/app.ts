@@ -4,7 +4,6 @@ import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
-
 // Routes
 import indexRouter from '@routes/index';
 import usersRouter from '@routes/users';
@@ -13,7 +12,7 @@ import usersRouter from '@routes/users';
 dotenv.config();
 
 const app = express();
-const port = process.env.port ?? '8000';
+const port = process.env.PORT ?? '8000';
 
 app.use(cors()); // Enable CORS for all routes
 

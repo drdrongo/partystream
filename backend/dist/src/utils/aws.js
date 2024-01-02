@@ -23,7 +23,6 @@ const getBucketParams = (fileExtension) => {
 const getUploadUrl = (fileExtension) => {
     const [s3, params] = getBucketParams(fileExtension);
     const uploadUrl = s3.getSignedUrl('putObject', params);
-    console.log('Secure upload URL:', uploadUrl);
     return uploadUrl;
 };
 exports.getUploadUrl = getUploadUrl;
