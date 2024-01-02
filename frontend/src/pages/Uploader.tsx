@@ -1,48 +1,15 @@
-import { useEffect, useState } from "react";
-import "./App.css";
-import Compressor from "compressorjs";
+import { useState } from "react";
+import "./Uploader.css";
+import { compressImage } from "@utils/images";
+import { IMAGE_SIZES } from "@enums/imageSizes";
+import SizesModal from "@components/SizesModal";
+import StatusBox, { LoadStatus } from "@components/StatusBox";
 
-let statusTimeout: number;
-
-function App() {
+function Uploader() {
   const [file, setFile] = useState<File | undefined>(undefined);
-  const [status, setStatus] = useState<
-    "loading" | "success" | "failure" | undefined
-  >(undefined);
-
-  async function compressImage(
-    fileInput: File | Blob,
-    quality: number
-  ): Promise<File | Blob | void> {
-    return new Promise((resolve, reject) => {
-      const options = {
-        quality: quality || 0.8,
-        success(result: File | Blob) {
-          resolve(result);
-        },
-        error(err: Error) {
-          reject(err.message || err);
-        },
-      };
-
-      new Compressor(fileInput, options);
-    });
-  }
-
-  // const compressFile = async (file: File): Promise<void> => {
-  //   new Compressor(file, {
-  //     quality: 0.6,
-
-  //     // The compression process is asynchronous,
-  //     // which means you have to access the `result` in the `success` hook function.
-  //     success(result) {
-  //       setFileToUpload(result);
-  //     },
-  //     error(err) {
-  //       console.log(err.message);
-  //     },
-  //   });
-  // };
+  const [status, setStatus] = useState<LoadStatus>(undefined);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sizes, setSizes] = useState([0, 0, 0, 0]);
 
   async function uploadFile(fileToUpload: File | Blob, signedUrl: string) {
     try {
@@ -56,7 +23,6 @@ function App() {
       });
 
       if (response.ok) {
-        console.log("File uploaded successfully!");
         // Handle success, update UI, etc.
       } else {
         console.error(
@@ -80,12 +46,9 @@ function App() {
         file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length) ||
         file.name;
 
-      const { secureUploadUrl } = await fetch(
-        "http://localhost:8000?" +
-          new URLSearchParams({
-            fileExtension,
-          })
-      ).then((response) => {
+      const backendUrl = new URL(import.meta.env.VITE_BASE_URL);
+      backendUrl.searchParams.append("fileExtension", fileExtension);
+      const { secureUploadUrl } = await fetch(backendUrl).then((response) => {
         // Check if the request was successful (status code 2xx)
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -104,17 +67,7 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    if (!status || status === "loading") return;
-
-    if (statusTimeout) clearTimeout(statusTimeout);
-
-    statusTimeout = setTimeout(() => {
-      setStatus(undefined);
-    }, 4000);
-  }, [status]);
-
-  const handleFetchSignedUrl = async (): Promise<void> => {
+  const handleFetchSignedUrl = async (quality: number) => {
     setStatus("loading");
     try {
       const signedUrl = await fetchSignedUrl();
@@ -124,7 +77,7 @@ function App() {
 
       let imageData: File | Blob = file;
       if (true && file) {
-        const compressedData = await compressImage(file, 0.1);
+        const compressedData = await compressImage(file, quality);
         if (!compressedData) throw new Error("Failed to compress image");
 
         imageData = compressedData;
@@ -136,13 +89,44 @@ function App() {
     }
   };
 
+  const getAllSizes = async (): Promise<number[]> => {
+    if (!file) return [0, 0, 0, 0];
+
+    const compressedImages = await Promise.all([
+      compressImage(file, IMAGE_SIZES.SMALL),
+      compressImage(file, IMAGE_SIZES.MEDIUM),
+      compressImage(file, IMAGE_SIZES.LARGE),
+    ]);
+    const sizes: number[] = [];
+    const fileSizes = compressedImages.reduce((acc, curr) => {
+      if (!curr) return acc;
+
+      return [...acc, curr.size];
+    }, sizes);
+    return [...fileSizes, file.size];
+  };
+
+  const selectSize = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    handleFetchSignedUrl(Number(event.currentTarget.value));
+    setIsModalOpen(false);
+  };
+
+  const openSizesModal = async () => {
+    setStatus("loading");
+    const fileSizes = await getAllSizes();
+    setSizes(fileSizes);
+    setIsModalOpen(true);
+    setStatus(undefined);
+  };
+
   return (
     <div>
-      {status && (
-        <div className={`status ${status ? `status-${status}` : ""}`}>
-          {status}
-        </div>
-      )}
+      <StatusBox
+        status={status}
+        setStatus={(st: LoadStatus) => setStatus(st)}
+      />
 
       <div className="flex-down">
         <h1>Get signed url</h1>
@@ -150,10 +134,15 @@ function App() {
           type="file"
           name="image-upload"
           id="image-upload"
-          accept="image/jpeg"
+          accept="image/*"
           onChange={(e) => setFile(e.target.files?.[0])}
         />
-        <button disabled={!file} onClick={handleFetchSignedUrl}>
+        <SizesModal
+          isModalOpen={isModalOpen}
+          sizes={sizes}
+          handleClick={selectSize}
+        />
+        <button disabled={!file} onClick={openSizesModal}>
           Upload File
         </button>
       </div>
@@ -161,4 +150,4 @@ function App() {
   );
 }
 
-export default App;
+export default Uploader;
