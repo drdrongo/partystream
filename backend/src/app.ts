@@ -3,6 +3,7 @@ import path from 'path';
 import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 // Routes
 import indexRouter from '@routes/index';
@@ -13,6 +14,16 @@ dotenv.config();
 
 const app = express();
 const port = process.env.port ?? '8000';
+
+app.use(cors()); // Enable CORS for all routes
+
+// For specific url:
+// const corsOptions = {
+//   origin: 'http://localhost:5173',
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//   credentials: true,
+// };
+// app.use(cors(corsOptions));
 
 app.use(logger('dev'));
 app.use(express.json());

@@ -3,10 +3,19 @@ import { getUploadUrl } from 'src/utils/aws';
 
 const router = Router();
 
-router.get('/', (req, res, next) => {
-  const secureUploadUrl = getUploadUrl();
+router.get('/', (req, res, _next) => {
+  const { fileExtension } = req.query;
 
-  // TODO: Use the secure URL to upload the image.
+  // Check if fileExtension is undefined and handle the case appropriately
+  if (typeof fileExtension !== 'string') {
+    // Handle the case where fileExtension is undefined
+    res
+      .status(400)
+      .json({ error: 'fileExtension is required in the query parameters' });
+    return;
+  }
+
+  const secureUploadUrl = getUploadUrl(fileExtension);
 
   const jsonData = {
     secureUploadUrl,
