@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 // Routes
 import indexRouter from '@routes/index';
-import usersRouter from '@routes/users';
+import imagesRouter from '@routes/images';
 
 // Load .env variables
 dotenv.config();
@@ -32,7 +32,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Use your routes
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/images', imagesRouter);
 
 // Start the server
 app.listen(port, () => {

@@ -1,9 +1,17 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const aws_1 = require("src/utils/aws");
 const router = (0, express_1.Router)();
-router.get('/', (req, res, _next) => {
+router.get('/list', (0, express_async_handler_1.default)(async (req, res, _next) => {
+    const imageKeys = await (0, aws_1.getObjectList)();
+    res.json(imageKeys);
+}));
+router.get('/upload-url', (0, express_async_handler_1.default)(async (req, res, _next) => {
     const { fileExtension } = req.query;
     if (typeof fileExtension !== 'string') {
         res
@@ -17,5 +25,5 @@ router.get('/', (req, res, _next) => {
         timestamp: new Date().toISOString(),
     };
     res.json(jsonData);
-});
+}));
 exports.default = router;
